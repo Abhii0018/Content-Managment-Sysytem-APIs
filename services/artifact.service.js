@@ -1,4 +1,5 @@
 import Artifact from "../models/artifact.js";
+import cloudinary from "../config/cloudinary.js";
 
 /**
  * Create a new artifact
@@ -20,10 +21,6 @@ export const createArtifactService = async ({
 
   return artifact;
 };
-
-
-
-
 
 
 
