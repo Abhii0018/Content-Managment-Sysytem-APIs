@@ -26,8 +26,6 @@ export const createArtifact = async (req, res) => {
 
 
 
-
-
 export const getArtifacts = async (req, res) => {
   try {
     const artifacts = await getArtifactsService({

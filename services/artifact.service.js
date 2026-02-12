@@ -35,3 +35,4 @@ export const getArtifactsService = async ({ userId, role }) => {
   // Non-admin sees only their own artifacts
   return await Artifact.find({ author: userId });
 };
+

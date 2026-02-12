@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Socket Chat Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      background: #f7f7f7;
+    }
+    .row {
+      margin-bottom: 12px;
+    }
+    label {
+      display: inline-block;
+      width: 120px;
+    }
+    input {
+      padding: 6px 8px;
+      width: 260px;
+    }
+    button {
+      padding: 6px 12px;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    #log {
+      background: #111;
+      color: #0f0;
+      padding: 12px;
+      height: 300px;
+      overflow: auto;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h2>Socket.IO Chat Test</h2>
+
+  <div class="row">
+    <label>Server URL</label>
+    <input id="serverUrl" value="http://localhost:5002" />
+  </div>
+  <div class="row">
+    <label>User ID</label>
+    <input id="userId" placeholder="sender user id" />
+  </div>
+  <div class="row">
+    <label>Receive ID</label>
+    <input id="receiveId" placeholder="receiver user id" />
+  </div>
+  <div class="row">
+    <label>Message</label>
+    <input id="message" placeholder="type a message" />
+  </div>
+
+  <div class="row">
+    <button id="connectBtn">Connect</button>
+    <button id="registerBtn">Register</button>
+    <button id="sendBtn">Send Message</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    let socket = null;
+
+    const logEl = document.getElementById("log");
+    const serverUrlEl = document.getElementById("serverUrl");
+    const userIdEl = document.getElementById("userId");
+    const receiveIdEl = document.getElementById("receiveId");
+    const messageEl = document.getElementById("message");
+
+    const log = (msg) => {
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    document.getElementById("connectBtn").addEventListener("click", () => {
+      const url = serverUrlEl.value.trim();
+      if (!url) {
+        log("Server URL is required");
+        return;
+      }
+
+      socket = io(url, { transports: ["websocket"] });
+
+      socket.on("connect", () => log(`Connected: ${socket.id}`));
+      socket.on("disconnect", () => log("Disconnected"));
+      socket.on("registered", (data) => log(`Registered: ${JSON.stringify(data)}`));
+      socket.on("receiveMessage", (data) => log(`Receive: ${JSON.stringify(data)}`));
+      socket.on("messageSent", (data) => log(`Sent: ${JSON.stringify(data)}`));
+      socket.on("messageError", (data) => log(`Error: ${JSON.stringify(data)}`));
+    });
+
+    document.getElementById("registerBtn").addEventListener("click", () => {
+      if (!socket) {
+        log("Connect first");
+        return;
+      }
+
+      const userId = userIdEl.value.trim();
+      if (!userId) {
+        log("User ID is required");
+        return;
+      }
+
+      socket.emit("register", { userId });
+    });
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      if (!socket) {
+        log("Connect first");
+        return;
+      }
+
+      const receiveId = receiveIdEl.value.trim();
+      const message = messageEl.value.trim();
+
+      if (!receiveId || !message) {
+        log("Receive ID and message are required");
+        return;
+      }
+
+      socket.emit("sendMessage", { receiveId, message });
+    });
+  </script>
+</body>
+</html>
