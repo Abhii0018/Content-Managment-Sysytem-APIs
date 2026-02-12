@@ -19,6 +19,7 @@ router.use(authMiddleware);
  * Auth: Cookie (token=jwt) or Header (Authorization: Bearer jwt)
  * Body: { "receiveId": "userId", "message": "text" }
  */
+
 router.post("/send", sendChatMessage);
 
 /**
@@ -47,6 +48,7 @@ router.get("/conversation/:receiveId", getConversation);
  * Get all threads for logged-in user
  * Auth: Cookie (token=jwt) or Header (Authorization: Bearer jwt)
  */
+
 router.get("/threads", getAllThreads);
 
 export default router;

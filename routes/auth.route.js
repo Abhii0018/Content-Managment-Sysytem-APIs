@@ -11,7 +11,7 @@ const router = express.Router();
  * SIGNUP FLOW
  */
 
-// Step 1: Initiate signup (generate OTP)
+// Step 1: Initiate signup (generate OTP). remember take base url as /auth in index.js, so the full url for this route will be /auth/signup/initiate
 router.post("/signup/initiate", initiateSignup);
 console.log("Signup initiation route set up at /auth/signup/initiate");
 
