@@ -1,4 +1,9 @@
-import { sendMessage, sendChatService, findOrCreateThread } from "../services/chat.service.js";
+import {
+  sendMessage,
+  sendChatService,
+  findOrCreateThread,
+  getThreadsForUser
+} from "../services/chat.service.js";
 
 /**
  * POST /chat/send
@@ -33,7 +38,10 @@ export const sendChatMessage = async (req, res) => {
       data: newMessage
     });
   } catch (error) {
-    res.status(500).json({
+    const statusCode =
+      error.message === "Cannot send message to yourself" ? 400 : 500;
+
+    res.status(statusCode).json({
       success: false,
       message: error.message || "Error sending message"
     });
@@ -58,7 +66,7 @@ export const getMessages = async (req, res) => {
     }
 
     // Get messages
-    const messages = await sendMessage(threadId);
+    const messages = await sendMessage(threadId, userId);
 
     res.status(200).json({
       success: true,
@@ -67,7 +75,14 @@ export const getMessages = async (req, res) => {
       count: messages.length
     });
   } catch (error) {
-    res.status(500).json({
+    let statusCode = 500;
+    if (error.message === "Not authorized") {
+      statusCode = 403;
+    } else if (error.message === "Thread not found") {
+      statusCode = 404;
+    }
+
+    res.status(statusCode).json({
       success: false,
       message: error.message || "Error fetching messages"
     });
@@ -81,12 +96,23 @@ export const getMessages = async (req, res) => {
 export const getOrCreateThread = async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
+    const requesterId = req.user.id;
 
     // Validate inputs
     if (!userId1 || !userId2) {
       return res.status(400).json({
         success: false,
         message: "Both userId1 and userId2 are required"
+      });
+    }
+
+    const isRequesterParticipant =
+      requesterId === userId1 || requesterId === userId2;
+
+    if (!isRequesterParticipant) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized"
       });
     }
 
@@ -126,7 +152,7 @@ export const getConversation = async (req, res) => {
     const threadDoc = await findOrCreateThread(senderId, receiveId);
 
     // Get messages
-    const messages = await sendMessage(threadDoc._id);
+    const messages = await sendMessage(threadDoc._id, senderId);
 
     res.status(200).json({
       success: true,
@@ -153,12 +179,12 @@ export const getAllThreads = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // This would need to be added to the service
-    // For now, returning a basic response
+    const threads = await getThreadsForUser(userId);
+
     res.status(200).json({
       success: true,
       message: "Threads fetched successfully",
-      data: []
+      data: threads
     });
   } catch (error) {
     res.status(500).json({

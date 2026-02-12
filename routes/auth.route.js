@@ -13,6 +13,7 @@ const router = express.Router();
 
 // Step 1: Initiate signup (generate OTP)
 router.post("/signup/initiate", initiateSignup);
+console.log("Signup initiation route set up at /auth/signup/initiate");
 
 // Step 2: Verify OTP and create user
 router.post("/signup/verify", verifySignupOtp);

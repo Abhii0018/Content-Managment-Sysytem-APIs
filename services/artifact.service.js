@@ -2,7 +2,7 @@ import Artifact from "../models/artifact.js";
 import cloudinary from "../config/cloudinary.js";
 
 /**
- * Create a new artifact
+ * Create a new artifact 
  */
 export const createArtifactService = async ({
   title,
@@ -28,11 +28,13 @@ export const createArtifactService = async ({
 
 export const getArtifactsService = async ({ userId, role }) => {
   if (role === "ADMIN") {
-    // Admin sees everything
+
+    // Admin sees everything about artifacts, including author details
+
     return await Artifact.find().populate("author", "name email role");
   }
 
-  // Non-admin sees only their own artifacts
+  // Non-admin sees only their own artifacts whatever they posted, but not the details of other users
   return await Artifact.find({ author: userId });
 };
 

@@ -9,14 +9,14 @@ import jwt from "jsonwebtoken";
  */
 
 export const initiateSignupService = async (email) => {
-  // 1. Check if user already exists
+  // 1. Check if user already exists in DB
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw new Error("User already exists");
   }
 
 
-  // 2. Remove old OTPs
+  // 2. Remove old OTPs for the email (if any) to ensure only one valid OTP at a time
   await OTP.deleteMany({ email });
 
   // 3. Generate OTP
